@@ -203,7 +203,9 @@ public partial class Gameboard : Node
                 var uid = CellToIndex(cell);
                 addedCells[uid] = cell;
                 
-                // todo: continue here
+                // Flag the cell as disabled if it is occupied.
+                if (Singletons.GamepieceRegistry.GetGamepiece(cell) is not null)
+                    _pathfinder.SetPointDisabled(uid);
             }
         }
         

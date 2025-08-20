@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using OpenRPG.Field.Gamepieces;
 
 namespace OpenRPG.Field.Gameboards;
 
@@ -30,9 +31,28 @@ public partial class Pathfinder : AStar2D
     
     public Pathfinder()
     {
-        // todo: complete this
+        Singletons.GamepieceRegistry.GamepieceMoved += GamepieceRegistryOnGamepieceMoved;
+        Singletons.GamepieceRegistry.GamepieceFreed += GamepieceRegistryOnGamepieceFreed;
     }
 
+    private void GamepieceRegistryOnGamepieceMoved(Gamepiece gamepiece, Vector2I newCell, Vector2I oldCell)
+    {
+        var newCellId = Singletons.Gameboard.CellToIndex(newCell);
+        if (HasPoint(newCellId))
+            SetPointDisabled(newCellId);
+        
+        var oldCellId = Singletons.Gameboard.CellToIndex(oldCell);
+        if (HasPoint(oldCellId))
+            SetPointDisabled(oldCellId, false);
+    }
+    
+    private void GamepieceRegistryOnGamepieceFreed(Gamepiece gamepiece, Vector2I cell)
+    {
+        var cellId = Singletons.Gameboard.CellToIndex(cell);
+        if (HasPoint(cellId))
+            SetPointDisabled(cellId, false);
+    }
+    
     /// <summary>
     /// Returns true if the coordinate is found in the Pathfinder.
     /// </summary>

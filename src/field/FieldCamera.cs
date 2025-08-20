@@ -5,6 +5,13 @@ using OpenRPG.Field.Gamepieces;
 
 namespace OpenRPG.Field;
 
+/// <summary>
+/// Specialized camera that is constrained to the [Gameboard]'s boundaries.
+/// The camera's limits are set dynamically according to the viewport's dimensions. Normally, the
+/// camera is limited to the [member Gameboard.boundaries].
+/// [br][br]In some cases the gameboard is smaller than the viewport, in which case it will be
+/// snapped to the gameboard centre along the constrained axis/axes.
+/// </summary>
 public partial class FieldCamera : Camera2D
 {
     private GameboardProperties _gameboardProperties;

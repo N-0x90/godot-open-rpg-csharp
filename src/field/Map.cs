@@ -46,9 +46,8 @@ public partial class Map : Node2D
         
         if (!Engine.IsEditorHint())
         {
-            // todo: fix this
-            // Camera.GameboardProperties = _gameboardProperties;
-            // Gameboard.Properties = _gameboardProperties;
+            Singletons.Camera.GameboardProperties = _gameboardProperties;
+            Singletons.Gameboard.Properties = _gameboardProperties;
         }
     }
 }

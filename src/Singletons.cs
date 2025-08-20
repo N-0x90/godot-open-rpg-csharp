@@ -1,4 +1,5 @@
 ﻿using Godot;
+using OpenRPG.Field;
 using OpenRPG.Field.Gamepieces;
 using OpenRPG.Gameboards;
 
@@ -6,6 +7,19 @@ namespace OpenRPG;
 
 public static class Singletons
 {
+    private static FieldCamera  _camera;
+
+    public static FieldCamera Camera
+    {
+        get
+        {
+            if (_camera == null)
+               _camera = GD.Load<FieldCamera>("/root/Camera");
+            
+            return _camera;
+        }
+    }
+
     private static Gameboard _gameboard;
 
     public static Gameboard Gameboard
