@@ -27,7 +27,7 @@ public partial class GameboardLayer : TileMapLayer
     /// <summary>
     /// The group name of all [GameboardLayer] that will be checked for blocked/walkable cells.
     /// </summary>
-    private const string Group = "GameboardTileMapLayers";
+    public const string Group = "GameboardTileMapLayers";
 
     /// <summary>
     /// The name of the "custom data layer" that determines whether or not a cell is blocked/walkable.

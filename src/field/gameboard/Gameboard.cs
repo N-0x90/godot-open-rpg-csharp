@@ -167,6 +167,118 @@ public partial class Gameboard : Node
         // Compare the changed cells with those already in the pathfinder. Any changes will cause the
         // Pathfinder to be updated.
         
-        // TODO: continue here 
+        boardMap.CellsChanged += (clearedCells, blockedCells) =>
+        {
+            if (boardMap.Name == "DoorGameboardLayer")
+                GD.Print("Door layer ", clearedCells, " ", blockedCells);
+
+            var addedCells = AddCellsToPathfinder(clearedCells);
+            var removedCells = RemoveCellsFromPathfinder(blockedCells);
+            
+            ConnectNewPathfinderCells(addedCells);
+            if (addedCells.Count > 0 || removedCells.Count > 0)
+                EmitSignalPathfinderChanged((Array<Vector2I>)addedCells.Values, removedCells);
+        };
+    }
+
+    /// <summary>
+    /// Add cells to the pathfinder, checking that there are no blocking tiles on any GameboardLayers.
+    /// Returns a dictionary representing the cells that are actually added to the pathfinder (may differ
+    /// from cleared_cells). Key = cell id (int, see cell_to_index), value = coordinate (Vector2i)
+    /// </summary>
+    /// <param name="clearedCells"></param>
+    /// <returns></returns>
+    private Dictionary<int, Vector2I> AddCellsToPathfinder(Array<Vector2I> clearedCells)
+    {
+        var addedCells = new Dictionary<int, Vector2I>();
+
+        // Verify whether or not cleared/blocked cells will change the state of the pathfinder.
+        // If there is no change in state, we will not pass along the cell to other systems and
+        // the pathfinder won't actually be changed.
+        foreach (var cell in clearedCells)
+        {
+            // Note that cleared cells need to have all layers checked for a blocking tile.
+            if (_properties.Extents.HasPoint(cell) && !_pathfinder.HasCell(cell) && IsCellClear(cell))
+            {
+                var uid = CellToIndex(cell);
+                addedCells[uid] = cell;
+                
+                // todo: continue here
+            }
+        }
+        
+        return addedCells;
+    }
+    
+    /// <summary>
+    /// Remove cells from the pathfinder so that Gamepieces can no longer move through them.
+    /// Only one Gameboard layer needs to block a cell for it to be considered blocked.
+    /// Returns an array of cell coordinates that have been blocked. Cells that were already not in the
+    /// pathfinder will be excluded from this array.
+    /// </summary>
+    /// <param name="blockedCells"></param>
+    /// <returns></returns>
+    private Array<Vector2I> RemoveCellsFromPathfinder(Array<Vector2I> blockedCells)
+    {
+        var removedCells = new Array<Vector2I>();
+
+        foreach (var cell in blockedCells)
+        {
+            // Only remove a cell that is already in the pathfinder. Also, we need to check that the cell
+            // is not clear, since this method is also called when cells are removed from GameboardLayers
+            // and other layers may still have this cell on their map.
+            if (_pathfinder.HasCell(cell) && !IsCellClear(cell))
+            {
+                _pathfinder.RemovePoint(CellToIndex(cell));
+                removedCells.Add(cell);
+            }
+        }
+        
+        return removedCells;
+    }
+
+    /// <summary>
+    /// Go through a list of cells added to the pathfinder (returned from _add_cells_to_pathfinder) and
+    /// connect them to each other and existing pathfinder cells.
+    /// </summary>
+    /// <param name="addedCells"></param>
+    private void ConnectNewPathfinderCells(Dictionary<int, Vector2I> addedCells)
+    {
+        foreach (var cell in addedCells)
+        {
+            if (_pathfinder.HasPoint(cell.Key))
+            {
+                foreach (var neighbor in GetAdjacentCells(cell.Value))
+                {
+                    var neighborId = CellToIndex(neighbor);
+                    if (_pathfinder.HasPoint(neighborId))
+                    {
+                        _pathfinder.ConnectPoints(cell.Key, neighborId);
+                    }
+                }
+            }
+        }
+    }
+
+    private bool IsCellClear(Vector2I coord)
+    {
+        var cellExists = false;
+
+        foreach (var node in GetTree().GetNodesInGroup(GameboardLayer.Group))
+        {
+            if (node is GameboardLayer tilemap)
+            {
+                if (tilemap.GetUsedCells().Contains(coord))
+                {
+                    cellExists = true;
+                    if (!tilemap.IsCellClear(coord))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        return cellExists;
     }
 }
