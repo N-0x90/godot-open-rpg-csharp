@@ -35,6 +35,7 @@ mono_crash.*.json
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+*.DotSettings.user
 
 bin/
 obj/

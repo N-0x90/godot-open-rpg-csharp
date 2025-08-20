@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace OpenRPG.Field.Gameboard.Debug;
+namespace OpenRPG.Field.Gameboards.Debug;
 
 /// <summary>
 /// Draws the boundaries set by a [Gameboard] object.

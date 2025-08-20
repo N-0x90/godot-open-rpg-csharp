@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace OpenRPG.Field.Gameboard;
+namespace OpenRPG.Field.Gameboards;
 
 /// <summary>
 /// Defines the properties of the playable game map.

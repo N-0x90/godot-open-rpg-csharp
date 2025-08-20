@@ -1,7 +1,7 @@
 using Godot;
 using System;
-using OpenRPG.Field.Gameboard;
-using OpenRPG.Field.Gameboard.Debug;
+using OpenRPG.Field.Gameboards;
+using OpenRPG.Field.Gameboards.Debug;
 
 namespace OpenRPG.Field;
 
@@ -46,8 +46,9 @@ public partial class Map : Node2D
         
         if (!Engine.IsEditorHint())
         {
-            Camera.GameboardProperties = _gameboardProperties;
-            Gameboard.Properties = _gameboardProperties;
+            // todo: fix this
+            // Camera.GameboardProperties = _gameboardProperties;
+            // Gameboard.Properties = _gameboardProperties;
         }
     }
 }

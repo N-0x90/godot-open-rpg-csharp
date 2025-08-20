@@ -1,6 +1,7 @@
 using Godot;
 using System;
-using OpenRPG.Field.Gameboard;
+using OpenRPG.Field.Gameboards;
+using OpenRPG.Field.Gamepieces;
 
 namespace OpenRPG.Field;
 
