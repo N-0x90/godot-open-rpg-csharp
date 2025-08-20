@@ -25,4 +25,23 @@ public partial class Directions : RefCounted
             { Points.South, Vector2I.Down },
             { Points.West,  Vector2I.Left }
         };
+
+    public static Points AngleToDirection(float angle)
+    {
+        if (angle <= Mathf.Pi / 4 && angle > -3 * Mathf.Pi / 4)
+            return Points.North;
+        
+        if (angle <= Mathf.Pi / 4 && angle > -Mathf.Pi / 4)
+            return Points.East;
+        
+        if (angle <= 3 * Mathf.Pi / 4 && angle > Mathf.Pi / 4)
+            return Points.South;
+
+        return Points.West;
+    }
+
+    public static Points VectorToDirection(Vector2 vector)
+    {
+        return AngleToDirection(vector.Angle());
+    }
 }

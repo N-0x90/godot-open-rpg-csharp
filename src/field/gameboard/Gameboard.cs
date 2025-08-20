@@ -35,7 +35,7 @@ public partial class Gameboard : Node
     /// An invalid cell is not part of the gameboard. Note that this requires positive
     /// [member boundaries].
     /// </summary>
-    private readonly Vector2I InvalidCell = new (-1, -1);
+    public readonly Vector2I InvalidCell = new (-1, -1);
     
     private readonly int InvalidIndex = -1;
     

@@ -124,7 +124,102 @@ public partial class Gamepiece : Path2D
             var cell = Singletons.Gameboard.GetCellUnderNode(this);
             Position = Singletons.Gameboard.CellToPixel(cell);
             
-            // TODO: continue here
+            // Then register the gamepiece with the registry. Note that if a gamepiece already exists at
+            // the cell, this one will simply be freed.
+            if (!Singletons.GamepieceRegistry.Register(this, cell))
+            {
+                QueueFree();
+            }
         }
+    }
+
+    public override void _Process(double delta)
+    {
+        // How far will the gamepiece move this frame
+        var moveDistance = MoveSpeed *  delta;
+
+        // We need to let others know that the gamepiece will arrive at the end of its path THIS frame.
+        // A controller may want to extend the path (for example, if a move key is held down or if
+        // another waypoint should be added to the move path).
+        // If we do NOT do so and the path is extended post arrival, there will be a single frame where
+        // the gamepiece's velocity is discontinuous (drops, then increases again), causing jittery
+        // movement.
+        // The excess travel distance allows us to know how much to extend the path by. A VERY fast
+        // gamepiece may jump a few cells at a time.
+        var excessTravelDistance = Follower.Progress + moveDistance - Curve.GetBakedLength();
+        if (excessTravelDistance >= 0)
+        {
+            EmitSignalArriving((float)excessTravelDistance);
+        }
+        
+        // The path may have been extended, so the gamepiece can move along the path now.
+        Follower.Progress += (float)moveDistance;
+
+        // Figure out which direction the gamepiece is facing, making sure that the GamepieceAnimation
+        // scene doesn't rotate.
+        _animation.GlobalRotation = 0;
+        _direction = Directions.AngleToDirection(Follower.Rotation);
+
+        // If the gamepiece has arrived, update it's position and movement details.
+        if (Follower.Progress >= Curve.GetBakedLength())
+        {
+            Stop();
+        }
+    }
+
+    /// <summary>
+    /// Move the gamepiece towards a point, given in pixel coordinates.
+    /// If the Gamepiece is currently moving, this point will be added to the current path (see
+    /// [member Path2D.curve]. Otherwise, a new curve is created with the point as the target.[br][br]
+    /// Note that the Gamepiece's position will remain fixed until it has fully traveresed its movement
+    /// path. At this point, its position is then updated to its destination.
+    /// </summary>
+    /// <param name="targetPoint"></param>
+    public void MoveTo(Vector2 targetPoint)
+    {
+        // Note that the destination is where the gamepiece will end up in game world coordinates.
+        Destination = targetPoint;
+        SetProcess(true);
+
+        if (Curve is null)
+        {
+            Curve = new Curve2D();
+            Curve.AddPoint(Vector2.Zero);
+            _animation.Play("run");
+        }
+        
+        // The positions on the path, however, are all relative to the gamepiece's current position. The
+        // position doesn't update until the Gamepiece reaches its final destination, otherwise the path
+        // would move along with the gamepiece.
+        Curve.AddPoint(Destination - Position);
+    }
+
+    /// <summary>
+    /// Stop the gamepiece from travelling and update its positio
+    /// </summary>
+    public void Stop()
+    {
+        // Sort out gamepiece position, resetting the follower and placing everything at the destination.
+        Position = Destination;
+        Follower.Progress = 0;
+        Curve = null;
+        Destination = Vector2.Zero;
+
+        // Handle the change to animation.
+        _animation.GlobalRotation = 0;
+        _animation.Play("idle");
+        
+        // Stop movement and update logic.
+        SetProcess(false);
+        EmitSignalArrived();
+    }
+
+    /// <summary>
+    /// Returns [code]true[/code] if the gamepiece is currently moving along its [member Path2D.curve].
+    /// </summary>
+    /// <returns></returns>
+    public bool IsMoving()
+    {
+        return IsProcessing();
     }
 }
