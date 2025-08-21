@@ -3,7 +3,7 @@ using Godot.Collections;
 using OpenRPG.Common;
 using OpenRPG.Field.Gameboards;
 
-namespace OpenRPG.Gameboards;
+namespace OpenRPG.Field.Gameboards;
 
 /// <summary>
 /// Defines the playable area of the game and where everything on it lies.
@@ -57,7 +57,7 @@ public partial class Gameboard : Node
     /// <summary>
     /// A reference to the Pathfinder for the current playable area.
     /// </summary>
-    private Pathfinder _pathfinder;
+    public Pathfinder Pathfinder = new ();
 
     /// <summary>
     /// Convert cell coordinates to pixel coordinates.
@@ -198,14 +198,14 @@ public partial class Gameboard : Node
         foreach (var cell in clearedCells)
         {
             // Note that cleared cells need to have all layers checked for a blocking tile.
-            if (_properties.Extents.HasPoint(cell) && !_pathfinder.HasCell(cell) && IsCellClear(cell))
+            if (_properties.Extents.HasPoint(cell) && !Pathfinder.HasCell(cell) && IsCellClear(cell))
             {
                 var uid = CellToIndex(cell);
                 addedCells[uid] = cell;
                 
                 // Flag the cell as disabled if it is occupied.
                 if (Singletons.GamepieceRegistry.GetGamepiece(cell) is not null)
-                    _pathfinder.SetPointDisabled(uid);
+                    Pathfinder.SetPointDisabled(uid);
             }
         }
         
@@ -229,9 +229,9 @@ public partial class Gameboard : Node
             // Only remove a cell that is already in the pathfinder. Also, we need to check that the cell
             // is not clear, since this method is also called when cells are removed from GameboardLayers
             // and other layers may still have this cell on their map.
-            if (_pathfinder.HasCell(cell) && !IsCellClear(cell))
+            if (Pathfinder.HasCell(cell) && !IsCellClear(cell))
             {
-                _pathfinder.RemovePoint(CellToIndex(cell));
+                Pathfinder.RemovePoint(CellToIndex(cell));
                 removedCells.Add(cell);
             }
         }
@@ -248,14 +248,14 @@ public partial class Gameboard : Node
     {
         foreach (var cell in addedCells)
         {
-            if (_pathfinder.HasPoint(cell.Key))
+            if (Pathfinder.HasPoint(cell.Key))
             {
                 foreach (var neighbor in GetAdjacentCells(cell.Value))
                 {
                     var neighborId = CellToIndex(neighbor);
-                    if (_pathfinder.HasPoint(neighborId))
+                    if (Pathfinder.HasPoint(neighborId))
                     {
-                        _pathfinder.ConnectPoints(cell.Key, neighborId);
+                        Pathfinder.ConnectPoints(cell.Key, neighborId);
                     }
                 }
             }

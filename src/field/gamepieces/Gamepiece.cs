@@ -2,7 +2,7 @@ using Godot;
 using System;
 using OpenRPG.Common;
 using OpenRPG.Field.Gamepieces.Animation;
-using OpenRPG.Gameboards;
+using OpenRPG.Field.Gameboards;
 
 namespace OpenRPG.Field.Gamepieces;
 
